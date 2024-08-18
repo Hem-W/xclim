@@ -1323,14 +1323,14 @@ def standardized_precipitation_evapotranspiration_index(
         with xarray.set_options(keep_attrs=True):
             wb = wb + offset
 
-    dist_methods = {"gamma": ["ML", "APP", "PWM"], "fisk": ["ML", "APP"]}
-    if dist in dist_methods.keys():
-        if method not in dist_methods[dist]:
-            raise NotImplementedError(
-                f"{method} method is not implemented for {dist} distribution"
-            )
-    else:
-        raise NotImplementedError(f"{dist} distribution is not yet implemented.")
+    # dist_methods = {"gamma": ["ML", "APP", "PWM"], "fisk": ["ML", "APP"]}
+    # if dist in dist_methods.keys():
+    #     if method not in dist_methods[dist]:
+    #         raise NotImplementedError(
+    #             f"{method} method is not implemented for {dist} distribution"
+    #         )
+    # else:
+    #     raise NotImplementedError(f"{dist} distribution is not yet implemented.")
 
     # Water budget is not expected to be zero-inflated
     zero_inflated = False

@@ -7,6 +7,7 @@ import warnings
 from collections.abc import Sequence
 from typing import Any
 
+import lmoments3 as lm3
 import numpy as np
 import scipy.stats
 import xarray as xr
@@ -114,7 +115,8 @@ def fit(
         raise ValueError(f"Fitting method not recognized: {method}")
 
     # Get the distribution
-    dist = get_dist(dist)
+    if type(dist) is str:
+        dist = get_dist(dist)
 
     if method == "PWM" and not hasattr(dist, "lmom_fit"):
         raise ValueError(
@@ -426,11 +428,12 @@ def frequency_analysis(
     return fa(sel, t, dist=dist, mode=mode, method=method)
 
 
-def get_dist(dist: str | scipy.stats.rv_continuous):
+def get_dist(dist: str | scipy.stats.rv_continuous | lm3.distr.LmomDistrMixin):
     """Return a distribution object from `scipy.stats`."""
     if isinstance(dist, scipy.stats.rv_continuous):
         return dist
-
+    if isinstance(dist, lm3.distr.LmomDistrMixin):
+        return dist
     dc = getattr(scipy.stats, dist, None)
     if dc is None:
         e = f"Statistical distribution `{dist}` is not found in scipy.stats."
@@ -767,14 +770,14 @@ def standardized_index_fit_params(
             da = da + convert_units_to(offset, da, context="hydro")
 
     # "WPM" method doesn't seem to work for gamma or pearson3
-    dist_and_methods = {"gamma": ["ML", "APP", "PWM"], "fisk": ["ML", "APP"]}
+    # dist_and_methods = {"gamma": ["ML", "APP", "PWM"], "fisk": ["ML", "APP"]}
     dist = get_dist(dist)
-    if dist.name not in dist_and_methods:
-        raise NotImplementedError(f"The distribution `{dist.name}` is not supported.")
-    if method not in dist_and_methods[dist.name]:
-        raise NotImplementedError(
-            f"The method `{method}` is not supported for distribution `{dist.name}`."
-        )
+    # if dist.name not in dist_and_methods:
+    #     raise NotImplementedError(f"The distribution `{dist.name}` is not supported.")
+    # if method not in dist_and_methods[dist.name]:
+    #     raise NotImplementedError(
+    #         f"The method `{method}` is not supported for distribution `{dist.name}`."
+    #     )
     da, group = preprocess_standardized_index(da, freq, window, **indexer)
     if zero_inflated:
         prob_of_zero = da.groupby(group).map(
